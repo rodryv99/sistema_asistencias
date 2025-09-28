@@ -32,8 +32,17 @@ require_once 'views/layout/header.php';
                         <strong>Período:</strong>
                         <span><?= htmlspecialchars($grupo['periodo_nombre']) ?></span>
                     </div>
+                    <div class="detail-item">
+                        <strong>Nombre del Grupo:</strong>
+                        <span><?= htmlspecialchars($grupo['nombre']) ?></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Fecha de Creación:</strong>
+                        <span><?= date('d/m/Y H:i', strtotime($grupo['created_at'])) ?></span>
+                    </div>
                 </div>
             </div>
+
             <div class="detail-section">
                 <h4><i class="fas fa-users"></i> Resumen de Estudiantes</h4>
                 <div class="detail-items">
@@ -56,8 +65,8 @@ require_once 'views/layout/header.php';
         <h3><i class="fas fa-user-graduate"></i> Estudiantes Inscritos</h3>
     </div>
     <div class="card-body">
-        <div class="card" style="margin-bottom: 30px; background: #fdfdfd;">
-            <div class="card-body">
+        <div class="card" style="margin-bottom: 30px; background: #fdfdfd; box-shadow: none; border: 1px solid var(--border);">
+            <div class="card-body" style="padding: 20px;">
                 <form action="<?php echo BASE_URL; ?>/grupos/inscribir/<?= $grupo['id'] ?>" method="POST" class="form-inline">
                     <div class="form-group">
                         <label for="estudiante_id" class="form-label">Inscribir estudiante al grupo:</label>
@@ -67,18 +76,21 @@ require_once 'views/layout/header.php';
                                 <option disabled>No hay más estudiantes para inscribir</option>
                             <?php else: ?>
                                 <?php foreach ($estudiantesNoInscritos as $estudiante): ?>
-                                    <option value="<?= $estudiante['id'] ?>"><?= htmlspecialchars($estudiante['apellido'] . ', ' . $estudiante['nombre']) ?></option>
+                                    <option value="<?= $estudiante['id'] ?>"><?= htmlspecialchars($estudiante['apellido'] . ', ' . $estudiante['nombre']) ?> (<?= $estudiante['registro'] ?>)</option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-success" <?= empty($estudiantesNoInscritos) ? 'disabled' : '' ?>><i class="fas fa-plus"></i> Inscribir</button>
+                    <button type="submit" class="btn btn-success" <?= empty($estudiantesNoInscritos) ? 'disabled' : '' ?>>
+                        <i class="fas fa-plus"></i> Inscribir
+                    </button>
                 </form>
             </div>
         </div>
 
         <?php if (empty($estudiantesInscritos)): ?>
             <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
                 <p>Aún no hay estudiantes inscritos en este grupo.</p>
             </div>
         <?php else: ?>
@@ -88,10 +100,10 @@ require_once 'views/layout/header.php';
                         <tr>
                             <th>Estudiante</th>
                             <th>Registro</th>
-                            <th style="width: 200px;">% Asistencia</th>
-                            <th>Presente</th>
-                            <th>Ausente</th>
-                            <th>Tardanza</th>
+                            <th style="width: 200px;">% Asistencia (en este grupo)</th>
+                            <th title="Presente">P</th>
+                            <th title="Ausente">A</th>
+                            <th title="Tardanza">T</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -112,7 +124,9 @@ require_once 'views/layout/header.php';
                                 <td style="text-align: center;"><?= $estudiante['stats']['tardanza'] ?></td>
                                 <td>
                                     <form action="<?php echo BASE_URL; ?>/grupos/quitar/<?= $estudiante['inscripcion_id'] ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres quitar a este estudiante del grupo?');">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Quitar del grupo"><i class="fas fa-user-times"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Quitar del grupo">
+                                            <i class="fas fa-user-times"></i>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
@@ -127,14 +141,7 @@ require_once 'views/layout/header.php';
 <style>
 .form-inline { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
 .form-inline .form-group { flex: 1; margin-bottom: 0; }
-/* CAMBIO CLAVE: El texto de la barra ahora es oscuro y está dentro de un <span> para mejor control */
-.progress-bar span { 
-    color: var(--dark); 
-    font-size: 0.8rem; 
-    font-weight: bold; 
-    text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
-    padding-left: 5px;
-}
+.progress-bar span { color: var(--dark); font-size: 0.8rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255,255,255,0.5); padding-left: 5px; }
 </style>
 
 <?php require_once 'views/layout/footer.php'; ?>

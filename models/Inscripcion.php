@@ -13,7 +13,7 @@ class Inscripcion extends BaseModel {
      */
     public function findAll() {
         $query = "SELECT 
-                    i.id, i.fecha_inscripcion, i.activa,
+                    i.id, i.fecha_inscripcion, i.activa, i.grupo_id,
                     e.nombre as estudiante_nombre, e.apellido as estudiante_apellido, e.registro as estudiante_registro,
                     g.nombre as grupo_nombre,
                     m.nombre as materia_nombre, m.sigla as materia_sigla,
@@ -45,22 +45,15 @@ class Inscripcion extends BaseModel {
             $errors['grupo_id'] = 'Debe seleccionar un grupo.';
         }
 
-        // Validar que el estudiante no esté ya inscrito en ese grupo
         if (empty($errors)) {
             $sql = "SELECT id FROM {$this->table} WHERE estudiante_id = :estudiante_id AND grupo_id = :grupo_id";
-            $params = [
-                ':estudiante_id' => $data['estudiante_id'],
-                ':grupo_id' => $data['grupo_id']
-            ];
-
+            $params = [':estudiante_id' => $data['estudiante_id'], ':grupo_id' => $data['grupo_id']];
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
-
             if ($stmt->fetch()) {
                 $errors['duplicado'] = 'El estudiante ya está inscrito en este grupo.';
             }
         }
-
         return $errors;
     }
 
@@ -74,34 +67,13 @@ class Inscripcion extends BaseModel {
                 VALUES (:estudiante_id, :grupo_id, NOW(), NOW(), NOW())";
         
         $stmt = $this->db->prepare($sql);
-        
         $stmt->bindParam(':estudiante_id', $data['estudiante_id'], PDO::PARAM_INT);
         $stmt->bindParam(':grupo_id', $data['grupo_id'], PDO::PARAM_INT);
         
         if ($stmt->execute()) {
             return $this->db->lastInsertId();
         }
-        
         return false;
-    }
-
-    /**
-     * Actualiza el estado de una inscripción (activar/desactivar).
-     * @param int $id ID de la inscripción
-     * @param bool $estado Nuevo estado (true para activa, false para inactiva)
-     * @return bool True si tuvo éxito, false si no
-     */
-    public function updateStatus($id, $estado) {
-        $sql = "UPDATE {$this->table} 
-                SET activa = :activa, updated_at = NOW() 
-                WHERE id = :id";
-        
-        $stmt = $this->db->prepare($sql);
-        
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':activa', $estado, PDO::PARAM_BOOL);
-        
-        return $stmt->execute();
     }
 }
 ?>
